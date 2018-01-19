@@ -11,8 +11,9 @@ class CUIC {
   // initiate a sync of the CCE supervisor agent accounts into CUIC
   async syncCceSupervisors () {
     try {
+      let cookieJar = request.jar()
       const options = {
-        jar: true,
+        jar: cookieJar,
         followAllRedirects: true
       }
       // get initial cookie
