@@ -9,6 +9,13 @@ let cuic = new client({
 cuic.syncCceSupervisors()
 .then(results => {
   console.log('done')
+  // make sure the cookie jar isn't breaking a second attempt
+  cuic.syncCceSupervisors()
+  .then(results => {
+    console.log('done')
+  }).catch(error => {
+    console.error(error)
+  })
 }).catch(error => {
   console.error(error)
 })
