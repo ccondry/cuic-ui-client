@@ -1,10 +1,14 @@
 {
   "name": "cuic-ui-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A JavaScript client for Cisco Unified Intelligence Center web UI",
   "main": "index.js",
   "scripts": {
     "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/ccondry/cuic-ui-client.git"
   },
   "keywords": [
     "cisco",
