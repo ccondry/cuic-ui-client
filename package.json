@@ -6,6 +6,10 @@
   "scripts": {
     "test": "NODE_TLS_REJECT_UNAUTHORIZED=0 node test"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/ccondry/cuic-ui-client.git"
+  },
   "keywords": [
     "cisco",
     "cuic"
