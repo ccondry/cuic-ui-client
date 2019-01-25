@@ -1,6 +1,6 @@
 {
   "name": "cuic-ui-client",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A JavaScript client for Cisco Unified Intelligence Center web UI",
   "main": "index.js",
   "scripts": {
