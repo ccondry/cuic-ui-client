@@ -6,16 +6,22 @@ let cuic = new client({
   password: 'C1sco12345'
 })
 
-cuic.syncCceSupervisors()
+// cuic.syncCceSupervisors()
+// .then(results => {
+//   console.log('done')
+//   // make sure the cookie jar isn't breaking a second attempt
+//   cuic.syncCceSupervisors()
+//   .then(results => {
+//     console.log('done')
+//   }).catch(error => {
+//     console.error(error)
+//   })
+// }).catch(error => {
+//   console.error(error)
+// })
+cuic.createUser()
 .then(results => {
-  console.log('done')
-  // make sure the cookie jar isn't breaking a second attempt
-  cuic.syncCceSupervisors()
-  .then(results => {
-    console.log('done')
-  }).catch(error => {
-    console.error(error)
-  })
+  console.log(results)
 }).catch(error => {
   console.error(error)
 })
