@@ -1,5 +1,5 @@
 // this library
-const CUIC = require('../index.js')
+const CUIC = require('../src/index.js')
 // load config
 require('dotenv').load()
 
@@ -49,7 +49,7 @@ describe(`Test Security Permissions operations`, () => {
   //   console.log('found', results.length, 'system collections')
   //   return results
   // })
-  // 
+  //
   // it(`should get list of users`, async function () {
   //   const results = await client.getUsers()
   //   // console.log('results', results)
@@ -57,10 +57,10 @@ describe(`Test Security Permissions operations`, () => {
   //   return results
   // })
   //
-  // it(`should get list of groups`, async function () {
-  //   const results = await client.getGroups()
-  //   // console.log('results', results)
-  //   console.log('found', results.length, 'groups')
-  //   return results
-  // })
+  it(`should get list of groups`, async function () {
+    const results = await client.getGroups()
+    // console.log('results', results)
+    console.log('found', results.length, 'groups')
+    return results
+  })
 })
