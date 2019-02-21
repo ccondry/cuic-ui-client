@@ -56,21 +56,26 @@ class CUIC {
     this.lastAuthenticated = Date.now()
   }
 
+  async checkCookie () {
+    if (Date.now() - this.timeout > this.lastAuthenticated) {
+      // console.log('need to authenticate...')
+      // authenticate again to get new cookie
+      await this.authenticate()
+      // console.log('authenticated!')
+    } else {
+      // console.log('already authenticated')
+    }
+  }
+
   // get list of entities, like dashboards or reports
   async getEntities (entityType) {
+    let response
     try {
       // is our cookie expired?
       // console.log('Date.now', Date.now())
-      if (Date.now() - this.timeout > this.lastAuthenticated) {
-        console.log('need to authenticate...')
-        // authenticate again to get new cookie
-        await this.authenticate()
-        console.log('authenticated!')
-      } else {
-        console.log('already authenticated')
-      }
+      await this.checkCookie()
 
-      const response = await request({
+      response = await request({
         baseUrl: this.baseUrlCuic,
         url: '/cuic/security/SecurityPermissions.htmx',
         method: 'POST',
@@ -87,8 +92,7 @@ class CUIC {
           Cookie: this.cookieString
         }
       })
-      // extract and parse results
-      return JSON.parse(JSON.parse(response).entityData).items
+
     } catch (e) {
       if (e.statusCode === 302) {
         // redirect means not logged in
@@ -97,20 +101,47 @@ class CUIC {
         throw e
       }
     }
+
+    // extract and parse results
+    const r = JSON.parse(response)
+    if (r.entityData) {
+      try {
+        return JSON.parse(r.entityData).items
+      } catch (e) {
+        return r
+      }
+    } else {
+      return r
+    }
   }
 
   async setAllPermissions (permission, entityType, userOrGroup) {
     try {
       const list = await this.getEntities(entityType)
+      // console.log('found entities', list)
       for (const item of list) {
-        this.savePermission ({
-          id: userOrGroup,
-          entityType,
-          objId: item.id,
-          type: permission
-        })
-        .then(r => console.log('successfully saved permission', permission, 'on', item.id))
-        .catch(e => console.error('failed to save permission', permission, 'on', item.id))
+        // is this a folder?
+        let e
+        if (item.container === 'yes') {
+          // folder
+          e = entityType
+        } else {
+          // non-folder item
+          e = entityType - 1
+        }
+        try {
+          await this.savePermission ({
+            id: userOrGroup,
+            entityType: e,
+            objId: item.id,
+            type: permission
+          })
+          console.log('successfully saved permission', permission, 'on type', entityType, item.id, 'for group', userOrGroup)
+          // .then(r => console.log('successfully saved permission', permission, 'on type', entityType, item.id, 'for group', userOrGroup))
+          // .catch(e => console.error('failed to save permission', permission, 'on type', entityType, item.id, 'for group', userOrGroup, ':', e.message))
+        } catch (e) {
+          console.error('failed to save permission', permission, 'on type', entityType, item.id, 'for group', userOrGroup, ':', e.message)
+        }
       }
     } catch (e) {
       throw e
@@ -129,39 +160,39 @@ class CUIC {
     //   "type":3
     // }
     try {
-      const p = encodeURIComponent(JSON.stringify(permissions))
-      console.log('encoded permissions', p)
+      await this.checkCookie()
+      let body = 'cmd=SAVE_GROUP_PERMISSIONS'
+      // body += '&permissions=%7B%22isUser%22%3Afalse%2C%22objId%22%3A%22F8026749681C44BE8D07C0244221AC4E%22%2C%22entityType%22%3A5%7D'
+      body += '&permissions=' + encodeURIComponent(JSON.stringify(permissions))
+      body += '&isAjaxCall=true'
+
+      // console.log('body', body)
       const response = await request({
-        url: 'https://cuic1.dcloud.cisco.com:8444/cuic/security/SecurityPermissions.htmx',
+        baseUrl: this.baseUrlCuic,
+        url: '/cuic/security/SecurityPermissions.htmx',
         method: 'POST',
-        body: queryString.stringify({
-          cmd: 'SAVE_GROUP_PERMISSIONS',
-          permissions: p,
-          isAjaxCall: 'true'
-        }),
+        body,
         headers: {
-          Origin: 'https://cuic1.dcloud.cisco.com:8444',
-          Referer: 'https://cuic1.dcloud.cisco.com:8444/cuic/security/SecurityPermissions.htmx',
+          Origin: this.baseUrlCuic,
           'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest',
           Cookie: this.cookieString
         }
       })
-      // did we get JSON?
-      const trimmed = response.trim()
-      if (trimmed.indexOf('{') === 0) {
-        // success - parse and extract the payload
-        return JSON.parse(trimmed)
+      const json = JSON.parse(response)
+      if (json.returnCode === '0') {
+        // success
+        return
       } else {
-        throw Error('received non-JSON response from CUIC. check login credentials.')
+        // failed
+        throw Error(json.returnMsg)
       }
     } catch (e) {
       throw e
     }
   }
 
-  // get list of entities, like dashboards or reports
-  async getPermissions (entityType) {
+  // get permissions on an object
+  async getPermissions (entityType, objId, isUser = false) {
     try {
       // is our cookie expired?
       // console.log('Date.now', Date.now())
@@ -173,15 +204,28 @@ class CUIC {
       } else {
         console.log('already authenticated')
       }
+      // const body = queryString.stringify({
+      //   cmd: 'GET_USER_OR_GROUP_PERMISSIONS',
+      //   permissions: '%257B%2522isUser%2522%253Afalse%252C%2522objId%2522%253A%2522F8026749681C44BE8D07C0244221AC4E%2522%252C%2522entityType%2522%253A5%257D',
+      //   isAjaxCall: 'true'
+      // })
+
+      const p = {
+        isUser,
+        objId,
+        entityType
+      }
+
+      let body = 'cmd=GET_USER_OR_GROUP_PERMISSIONS'
+      // body += '&permissions=%7B%22isUser%22%3Afalse%2C%22objId%22%3A%22F8026749681C44BE8D07C0244221AC4E%22%2C%22entityType%22%3A5%7D'
+      body += '&permissions=' + encodeURIComponent(JSON.stringify(p))
+      body += '&isAjaxCall=true'
+      // console.log('body', body)
       const response = await request({
         baseUrl: this.baseUrlCuic,
         url: '/cuic/security/SecurityPermissions.htmx',
         method: 'POST',
-        body: queryString.stringify({
-          cmd: 'GET_USER_OR_GROUP_PERMISSIONS',
-          permissions: '%7B%22isUser%22%3Afalse%2C%22objId%22%3A%22F8026749681C44BE8D07C0244221AC4E%22%2C%22entityType%22%3A5%7D',
-          isAjaxCall: 'true'
-        }),
+        body,
         headers: {
           Origin: this.baseUrlCuic,
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -613,11 +657,14 @@ class CUIC {
 // set static properties
 CUIC.GROUP_ALL_USERS = '2222222222222222222222222222AAAA'
 CUIC.GROUP_ADMINISTRATORS = '2222222222222222222222222222BBBB'
+CUIC.OBJECT_TYPE_REPORT_FOLDERS = 2
+CUIC.OBJECT_TYPE_REPORT = 1
 CUIC.OBJECT_TYPE_REPORTS = 2
 CUIC.OBJECT_TYPE_REPORT_DEFINITIONS = 4
 CUIC.OBJECT_TYPE_DASHBOARDS = 6
 CUIC.OBJECT_TYPE_DATA_SOURCES = 7
 CUIC.OBJECT_TYPE_VALUE_LISTS = 8
+CUIC.OBJECT_TYPE_COLLECTIONS = 9
 CUIC.PERMISSION_NONE = 0
 CUIC.PERMISSION_EXECUTE = 3
 CUIC.PERMISSION_ALL = 7
