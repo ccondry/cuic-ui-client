@@ -17,6 +17,7 @@
   "author": "Coty Condry <ccondry@cisco.com>",
   "license": "ISC",
   "dependencies": {
+    "query-string": "^6.2.0",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"
   }
