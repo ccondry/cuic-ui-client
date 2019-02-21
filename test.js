@@ -28,8 +28,8 @@ let cuic = new client({
 //   console.error(error)
 // })
 
-// cuic.setAllPermissions(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_DASHBOARDS, client.GROUP_ALL_USERS)
-// cuic.setAllPermissions(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_REPORTS, client.GROUP_ALL_USERS)
+// cuic.setAllPermissionsGroup(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_DASHBOARDS, client.GROUP_ALL_USERS)
+// cuic.setAllPermissionsGroup(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_REPORTS, client.GROUP_ALL_USERS)
 // cuic.savePermission({
 //   // user or group ID. this one is AllUsers
 //   "id": "2222222222222222222222222222AAAA",
@@ -41,12 +41,12 @@ let cuic = new client({
 //   "type": 3
 // })
 // cuic.getEntities(client.OBJECT_TYPE_REPORTS)
-cuic.setAllPermissions(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_DASHBOARDS, client.GROUP_ALL_USERS)
+cuic.setAllPermissionsGroup(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_DASHBOARDS, client.GROUP_ALL_USERS)
 .then(r => {
-  cuic.setAllPermissions(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_REPORTS, client.GROUP_ALL_USERS)
+  cuic.setAllPermissionsGroup(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_REPORTS, client.GROUP_ALL_USERS)
 })
 .then(r => {
-  cuic.setAllPermissions(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_REPORT_DEFINITIONS, client.GROUP_ALL_USERS)
+  cuic.setAllPermissionsGroup(client.PERMISSION_EXECUTE, client.OBJECT_TYPE_REPORT_DEFINITIONS, client.GROUP_ALL_USERS)
 })
 // .then(cookieString => {
 // console.log(cookieString)
