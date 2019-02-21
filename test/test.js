@@ -50,17 +50,10 @@ describe(`Test Security Permissions operations`, () => {
   //   return results
   // })
   //
-  // it(`should get list of users`, async function () {
-  //   const results = await client.getUsers()
-  //   // console.log('results', results)
-  //   console.log('found', results.length, 'users')
-  //   return results
-  // })
-  //
-  it(`should get list of groups`, async function () {
-    const results = await client.getGroups()
+  it(`should get list of users and groups`, async function () {
+    const results = await client.getUsersAndGroups()
     // console.log('results', results)
-    console.log('found', results.length, 'groups')
+    console.log('found', results.users.length, 'users and', results.groups.length, 'groups')
     return results
   })
 })

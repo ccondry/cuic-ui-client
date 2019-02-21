@@ -37,6 +37,55 @@ class CUIC {
   }
 
   /* user-friendly methods */
+
+  // get list of users from security page
+  async getUsersAndGroups () {
+    try {
+      // get valid cookie first
+      await this.checkCookie()
+      // get HTML data
+      const html = await request({
+        baseUrl: this.baseUrlCuic,
+        url: '/cuic/security/SecurityPermissions.htmx',
+        method: 'GET',
+        headers: {
+          Origin: this.baseUrlCuic,
+          Cookie: this.cookieString
+        }
+      })
+
+      // get the section of HTML we need to work with
+      const string1 = 'var userGroupInfoJSONStr'
+      const start = html.indexOf(string1) + string1.length
+      const end = html.indexOf('var allUsers', start)
+      const part = html.substring(start, end)
+
+      // extract the JSON data for users and groups
+      const users = this.extractData(part, `potentialUserMembersJSONStr = '`, `';`)
+      const groups = this.extractData(part, `potentialGroupMembersJSONStr = '`, `';`)
+      // return both
+      return {users, groups}
+    } catch (e) {
+      throw e
+    }
+  }
+
+  // extract JSON string from HTML and parse it as JSON
+  extractData (html, string1, string2) {
+    const start = html.indexOf(string1) + string1.length
+    const end = html.indexOf(string2, start)
+    // did we find something?
+    if (start > 0 && end > 0) {
+      // extract the JSON data
+      const data = html.substring(start, end)
+      // return a JSON array
+      return JSON.parse(data)
+    } else {
+      // throw an error that is hopefully meaningful
+      throw Error('CUIC client - invalid data in getUsers response. Response length was ' + html.length)
+    }
+  }
+
   /* get list of items from security permission manager page */
   getReports () {
     return this.getEntities(CUIC.OBJECT_TYPE_REPORT_FOLDER)
@@ -60,78 +109,16 @@ class CUIC {
     return this.getEntities(CUIC.OBJECT_TYPE_SYSTEM_COLLECTION)
   }
 
-  async getUsers () {
-    try {
-      // get valid cookie first
-      await this.checkCookie()
-      // get HTML data
-      const response = await request({
-        baseUrl: this.baseUrlCuic,
-        url: '/cuic/security/SecurityPermissions.htmx',
-        method: 'GET',
-        headers: {
-          Origin: this.baseUrlCuic,
-          Cookie: this.cookieString
-        }
-      })
-      // extract the users JSON from the HTML
-      const string1 = `potentialUserMembersJSONStr = '`
-      const string2 = `';`
-      const start = response.indexOf(string1) + string1.length
-      const end = response.indexOf(string2, start)
-      // did we find something?
-      if (start > 0 && end > 0) {
-        // extract the JSON data
-        const data = response.substring(start, end)
-        // return a JSON array
-        return JSON.parse(data)
-      } else {
-        // throw an error that is hopefully meaningful
-        throw Error('CUIC client - invalid data in getUsers response. Response length was ' + response.length)
-      }
-    } catch (e) {
-      throw e
-    }
-  }
-
-  async getGroups () {
-    try {
-      // get valid cookie first
-      await this.checkCookie()
-      // get HTML data
-      const response = await request({
-        baseUrl: this.baseUrlCuic,
-        url: '/cuic/security/SecurityPermissions.htmx',
-        method: 'GET',
-        headers: {
-          Origin: this.baseUrlCuic,
-          Cookie: this.cookieString
-        }
-      })
-      // extract the users JSON from the HTML
-      const string1 = `potentialGroupMembersJSONStr = '`
-      const string2 = `';`
-      const start = response.indexOf(string1) + string1.length
-      const end = response.indexOf(string2, start)
-      // did we find something?
-      if (start > 0 && end > 0) {
-        // extract the JSON data
-        const data = response.substring(start, end)
-        // return a JSON array
-        return JSON.parse(data)
-      } else {
-        // throw an error that is hopefully meaningful
-        throw Error('CUIC client - invalid data in getGroups response. Response length was ' + response.length)
-      }
-    } catch (e) {
-      throw e
-    }
-  }
-
   /* set permissions for one item for a single user or list of users */
-  // setUserReportPermission (id, userId, permission) {
-  //   return this.setPermissionUser(CUIC.OBJECT_TYPE_REPORT_FOLDER)
-  // }
+  setUserReportPermission (id, userIds, permission) {
+    return this.setPermissionUser(CUIC.OBJECT_TYPE_REPORT_FOLDER)
+    return this.setPermissionUser({
+      id: userIds,
+      entityType: e,
+      objId: item.id,
+      type: permission
+    })
+  }
   // getReportDefinitions () {
   //   return this.getEntities(CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER)
   // }
