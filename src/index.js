@@ -106,37 +106,221 @@ class CUIC {
     return this.getEntities(CUIC.OBJECT_TYPE_COLLECTION)
   }
   getSystemCollections () {
-    return this.getEntities(CUIC.OBJECT_TYPE_SYSTEM_COLLECTION)
+    return this.getEntities(CUIC.OBJECT_TYPE_COLLECTION, true)
+  }
+
+  parsePermission (permission) {
+    switch (permission) {
+      case 'all':
+      case 'write':
+      case 'a': return CUIC.PERMISSION_ALL
+      case 'w': return CUIC.PERMISSION_ALL
+      case 'execute':
+      case 'x': return CUIC.PERMISSION_EXECUTE
+      case 'none': return CUIC.PERMISSION_NONE
+    }
+  }
+
+  getReportUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT, id, true)
+  }
+  getReportFolderUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_FOLDER, id, true)
+  }
+  getReportDefinitionUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DEFINITION, id, true)
+  }
+  getReportDefinitionFolderUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER, id, true)
+  }
+  getDataSourceUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_DATA_SOURCE, id, true)
+  }
+  getDashboardUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DASHBOARD, id, true)
+  }
+  getDashboardFolderUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DASHBOARD_FOLDER, id, true)
+  }
+  getValueListUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_VALUE_LIST, id, true)
+  }
+  getCollectionUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_COLLECTION, id, true)
+  }
+  getSystemCollectionUserPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_SYSTEM_COLLECTION, id, true)
+  }
+
+
+  getReportGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT, id, false)
+  }
+  getReportFolderGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_FOLDER, id, false)
+  }
+  getReportDefinitionGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DEFINITION, id, false)
+  }
+  getReportDefinitionFolderGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER, id, false)
+  }
+  getDataSourceGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_DATA_SOURCE, id, false)
+  }
+  getDashboardGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DASHBOARD, id, false)
+  }
+  getDashboardFolderGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_REPORT_DASHBOARD_FOLDER, id, false)
+  }
+  getValueListGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_VALUE_LIST, id, false)
+  }
+  getCollectionGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_COLLECTION, id, false)
+  }
+  getSystemCollectionGroupPermissions (id) {
+    return this.getPermissions(CUIC.OBJECT_TYPE_SYSTEM_COLLECTION, id, false)
   }
 
   /* set permissions for one item for a single user or list of users */
-  setUserReportPermission (id, userIds, permission) {
-    return this.setPermissionUser(CUIC.OBJECT_TYPE_REPORT_FOLDER)
+
+  // take user input and execute the proper internal method to set a permission for user
+  setPermissionUserMeta (objId, entityType, userIds, permission) {
+    // make sure userIds is an array
+    if (!Array.isArray(userIds)) userIds = [userIds]
+    // get type int for permission value
+    let type
+    if (typeof permission === 'string') {
+      // parse string to int
+      type = this.parsePermission(permission)
+    } else {
+      // hope it's an int
+      type = permission
+    }
     return this.setPermissionUser({
       id: userIds,
-      entityType: e,
-      objId: item.id,
-      type: permission
+      entityType,
+      objId,
+      type
     })
   }
-  // getReportDefinitions () {
-  //   return this.getEntities(CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER)
-  // }
-  // getDataSources () {
-  //   return this.getEntities(CUIC.OBJECT_TYPE_DATA_SOURCE)
-  // }
-  // getDashboards () {
-  //   return this.getEntities(CUIC.OBJECT_TYPE_REPORT_DASHBOARD_FOLDER)
-  // }
-  // getValueLists () {
-  //   return this.getEntities(CUIC.OBJECT_TYPE_VALUE_LIST)
-  // }
-  // getCollections () {
-  //   return this.getEntities(CUIC.OBJECT_TYPE_COLLECTION)
-  // }
-  // getSystemCollections () {
-  //   return this.getEntities(CUIC.OBJECT_TYPE_SYSTEM_COLLECTION)
-  // }
+
+  // take user input and execute the proper internal method to set a permission for user
+  setPermissionGroupMeta (objId, entityType, groupId, permission) {
+    // get type int for permission value
+    let type
+    if (typeof permission === 'string') {
+      // parse string to int
+      type = this.parsePermission(permission)
+    } else {
+      // hope it's an int
+      type = permission
+    }
+    return this.setPermissionGroup({
+      id: groupId,
+      entityType,
+      objId,
+      type
+    })
+  }
+
+  setReportFolderUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_REPORT_FOLDER, userIds, permission)
+  }
+  setReportUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_REPORT, userIds, permission)
+  }
+  setReportDefinitionUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_REPORT_DEFINITION, userIds, permission)
+  }
+  setReportDefinitionFolderUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER, userIds, permission)
+  }
+  setDataSourceUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_DATA_SOURCE, userIds, permission)
+  }
+  setDashboardUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_REPORT_DASHBOARD, userIds, permission)
+  }
+  setDashboardFolderUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_REPORT_DASHBOARD_FOLDER, userIds, permission)
+  }
+  setValueListUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_VALUE_LIST, userIds, permission)
+  }
+  setCollectionUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_COLLECTION, userIds, permission)
+  }
+  setSystemCollectionUserPermissions (objId, userIds, permission) {
+    return this.setPermissionUserMeta(objId, CUIC.OBJECT_TYPE_SYSTEM_COLLECTION, userIds, permission)
+  }
+
+  setReportFolderGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_REPORT_FOLDER, groupId, permission)
+  }
+  setReportGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_REPORT, groupId, permission)
+  }
+  setReportDefinitionGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_REPORT_DEFINITION, groupId, permission)
+  }
+  setReportDefinitionFolderGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER, groupId, permission)
+  }
+  setDataSourceGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_DATA_SOURCE, groupId, permission)
+  }
+  setDashboardGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_REPORT_DASHBOARD, groupId, permission)
+  }
+  setDashboardFolderGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_REPORT_DASHBOARD_FOLDER, groupId, permission)
+  }
+  setValueListGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_VALUE_LIST, groupId, permission)
+  }
+  setCollectionGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_COLLECTION, groupId, permission)
+  }
+  setSystemCollectionGroupPermissions (objId, groupId, permission) {
+    return this.setPermissionGroupMeta(objId, CUIC.OBJECT_TYPE_SYSTEM_COLLECTION, groupId, permission)
+  }
+
+  // set permissions for all reports and report folders for a single user ID or an array of user IDs
+  setAllReportUserPermissions (permission, userId) {
+    // make sure we have an array of user IDs, even if a single string ID was passed
+    const userIds = Array.isArray(userId) ? userId : [userId]
+    return this.setAllPermissionsUsers(permission, CUIC.OBJECT_TYPE_REPORT_FOLDER, CUIC.OBJECT_TYPE_REPORT, userIds)
+  }
+
+  // set permissions for all report definitions and report definintion folders for a single user ID or an array of user IDs
+  setAllReportDefinitionUserPermissions (permission, userId) {
+    // make sure we have an array of user IDs, even if a single string ID was passed
+    const userIds = Array.isArray(userId) ? userId : [userId]
+    return this.setAllPermissionsUsers(permission, CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER, CUIC.OBJECT_TYPE_REPORT_DEFINITION, userIds)
+  }
+
+  // set permissions for all dashboards and dashboard folders for a single user ID or an array of user IDs
+  setAllDashboardUserPermissions (permission, userId) {
+    // make sure we have an array of user IDs, even if a single string ID was passed
+    const userIds = Array.isArray(userId) ? userId : [userId]
+    return this.setAllPermissionsUsers(permission, CUIC.OBJECT_TYPE_REPORT_DASHBOARD_FOLDER, CUIC.OBJECT_TYPE_REPORT_DASHBOARD, userIds)
+  }
+
+  // set permissions for all reports and report folders for a user group ID
+  setAllReportGroupPermissions (permission, groupId) {
+    return this.setAllPermissionsGroup(permission, CUIC.OBJECT_TYPE_REPORT_FOLDER, CUIC.OBJECT_TYPE_REPORT, groupId)
+  }
+  // set permissions for all reports and report folders for a user group ID
+  setAllReportDefinitionGroupPermissions (permission, groupId) {
+    return this.setAllPermissionsGroup(permission, CUIC.OBJECT_TYPE_REPORT_DEFINITION_FOLDER, CUIC.OBJECT_TYPE_REPORT_DEFINITION, groupId)
+  }
+  // set permissions for all reports and report folders for a user group ID
+  setAllDashboardGroupPermissions (permission, groupId) {
+    return this.setAllPermissionsGroup(permission, CUIC.OBJECT_TYPE_REPORT_DASHBOARD_FOLDER, CUIC.OBJECT_TYPE_REPORT_DASHBOARD, groupId)
+  }
 
   // extract a key value from a request.js cookie jar
   getCookieValue (jar, path, key) {
@@ -215,7 +399,7 @@ class CUIC {
   }
 
   // get list of entities, like dashboards or reports
-  async getEntities (entityType) {
+  async getEntities (entityType, isSysCollections = false) {
     let response
     try {
       // is our cookie expired?
@@ -224,8 +408,8 @@ class CUIC {
       const body = queryString.stringify({
         cmd: 'LOAD_OBJECTS',
         entityType,
-        isSysCollections: 'false',
-        isAjaxCall: 'true'
+        isSysCollections,
+        isAjaxCall: true
       })
 
       response = await this.doSecurityPermissions(body)
@@ -252,18 +436,6 @@ class CUIC {
     } else {
       return r
     }
-  }
-
-  // set permissions for all reports and report folders for a user group ID
-  async setAllReportPermissionsGroup (permission, groupId) {
-    this.setAllPermissionsGroup (permission, CUIC.OBJECT_TYPE_REPORT_FOLDER, CUIC.OBJECT_TYPE_REPORT, groupId)
-  }
-
-  // set permissions for all reports and report folders for a single user ID or an array of user IDs
-  async setAllReportPermissionsUsers (permission, userId) {
-    // make sure we have an array of user IDs, even if a single string ID was passed
-    const userIds = Arrays.isArray(userId) ? userId : [userId]
-    this.setAllPermissionsUsers (permission, CUIC.OBJECT_TYPE_REPORT_FOLDER, CUIC.OBJECT_TYPE_REPORT, userIds)
   }
 
   // set permissions for all entities of a single type (and their containers) for list of user IDs
@@ -340,7 +512,7 @@ class CUIC {
   }
 
   // set permissions on an object for a list of user IDs
-  async setPermissionUser ({id, entityType, objId, type}) {
+  async setPermissionUser (permissions) {
     // permissions: {
     // user ID
     //   "id": ["D52FC6ED10000168000006B739ED7AF1"],
@@ -450,7 +622,14 @@ class CUIC {
         }
       })
       // extract and parse results
-      return response
+      const json = JSON.parse(response)
+      if (json.returnCode === '0') {
+        // success
+        return json.entityData
+      } else {
+        // failed
+        throw Error(json.returnMsg)
+      }
     } catch (e) {
       if (e.statusCode === 302) {
         // redirect means not logged in
@@ -544,7 +723,7 @@ class CUIC {
         method: 'POST',
         form: {
           cmd: 'CREATE',
-          isAjaxCall: 'true',
+          isAjaxCall: true,
           userInfo: JSON.stringify(newUser)
         },
         headers: {
@@ -561,8 +740,8 @@ class CUIC {
 }
 
 // set static properties
-CUIC.GROUP_ALL_USERS = '2222222222222222222222222222AAAA'
-CUIC.GROUP_ADMINISTRATORS = '2222222222222222222222222222BBBB'
+// CUIC.GROUP_ALL_USERS = '2222222222222222222222222222AAAA'
+// CUIC.GROUP_ADMINISTRATORS = '2222222222222222222222222222BBBB'
 
 CUIC.OBJECT_TYPE_REPORT = 1
 CUIC.OBJECT_TYPE_REPORT_FOLDER = 2
