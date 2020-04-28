@@ -34,6 +34,9 @@ describe(`Test OAMP operations`, () => {
 
 // start CUIC UI tests
 describe(`Test Security Permissions operations`, () => {
+  /***********
+   * Getters *
+   ***********/
   /* list objects */
   it(`should get list of reports`, async function () {
     const results = await client.getReports()
@@ -177,6 +180,9 @@ describe(`Test Security Permissions operations`, () => {
     return client.getSystemCollectionGroupPermissions(config.systemCollectionId)
   })
 
+  /***********
+   * Setters *
+   ***********/
   it(`should set group permissions for a report`, async function () {
     return client.setReportGroupPermissions(config.reportId, config.groupId, 'execute')
   })
