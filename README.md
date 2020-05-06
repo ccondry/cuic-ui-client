@@ -29,3 +29,11 @@ client.getReports()
 ```
 
 See test/test.js for more examples
+
+
+## CUIC 12.0 reset usage
+CUIC 12.0 features are just being added. Currently you can use 
+client.setPermissions, client.getPermissions, and client.list. 
+
+Run `yarn reset` to set VIEW permission = true for the AllUsers group for all
+reports, dashboards, and report definitions
