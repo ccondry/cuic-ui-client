@@ -431,13 +431,13 @@ class CUIC {
     // extract cookie values that we need
     let jSessionId = this.getCookieValue(jar, '/cuic', 'JSESSIONID')
     let jSessionIdSso = this.getCookieValue(jar, '/', 'JSESSIONIDSSO')
-    let xsrf = this.getCookieValue(jar, '/', 'XSRF-TOKEN')
+    this.xsrf = this.getCookieValue(jar, '/', 'XSRF-TOKEN')
 
     // set cookie string
     this.cookieString = makeCookieString({
       jSessionId,
       jSessionIdSso,
-      xsrf
+      xsrf: this.xsrf
     })
 
     // set authenticated timestamp
