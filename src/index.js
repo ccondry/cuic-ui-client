@@ -17,7 +17,15 @@ function sleep (ms) {
 // our class
 class CUIC {
   // host, username, password are required parameters
-  constructor ({host, username, password, domain = 'CUIC', timeout = 3600, throttle = 100}) {
+  constructor ({
+    host,
+    username,
+    password,
+    domain = 'CUIC',
+    timeout = 3600,
+    throttle = 100,
+    version = '11.6'
+  }) {
     if (!host) throw Error('CUIC client - host is a required parameter')
     if (!username) throw Error('CUIC client - username is a required parameter')
     if (!password) throw Error('CUIC client - password is a required parameter')
@@ -32,12 +40,91 @@ class CUIC {
     this.timeout = timeout * 1000
     // throttle for setAllPermissions functions, in milliseconds
     this.throttle = throttle
+    // version of the CUIC server
+    this.version = version
     // last cookie timestamp
     this.lastAuthenticated = 0
   }
 
-  /* user-friendly methods */
+  // get permissions in 12.0
+  async getPermissions (type, id) {
+    try {
+      // get valid cookie first
+      await this.checkCookie()
+      // get HTML data
+      return await request({
+        baseUrl: this.baseUrlCuic,
+        url: `/cuic/rest/permissions/${type.toUpperCase()}/${id}`,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: this.cookieString
+        }
+      })
+    } catch (e) {
+      throw e
+    }
+  }
 
+  // set permissions in 12.0
+  async setPermissions (type, id, permissions) {
+    try {
+      // get valid cookie first
+      await this.checkCookie()
+
+      return await request({
+        baseUrl: this.baseUrlCuic,
+        url: `/cuic/rest/permissions/${type.toUpperCase()}/${id}`,
+        method: 'POST',
+        body: permissions,
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: this.cookieString,
+          'X-XSRF-TOKEN': this.xsrf
+        },
+        json: true
+      })
+    } catch (e) {
+      throw e
+    }
+  }
+
+  // get list of entities, like dashboards or reports
+  async list (type) {
+    try {
+      // is our cookie expired?
+      await this.checkCookie()
+      // get the data
+      try {
+        return await request({
+          baseUrl: this.baseUrlCuic,
+          url: '/cuic/rest/en_US/' + type,
+          query: {
+            includeAll: true
+          },
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Cookie: this.cookieString
+          },
+          json: true
+        })
+      } catch (e) {
+        if (e.statusCode === 302) {
+          // redirect means not logged in
+          throw Error('not logged in')
+          // try to log in so the next request works
+          // this.authenticate().catch(e => {
+          //   console.error('CUIC client - failed to log in again', e.message)
+          // })
+        } else {
+          throw e
+        }
+      }
+    } catch (e) {
+      throw e
+    }
+  }
   // get list of users from security page
   async getUsersAndGroups () {
     try {

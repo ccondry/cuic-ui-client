@@ -4,7 +4,9 @@
   "description": "A JavaScript client for Cisco Unified Intelligence Center web UI",
   "main": "src/index.js",
   "scripts": {
-    "test": "NODE_EXTRA_CA_CERTS=/temp/dcloud-root-ca.crt mocha --timeout 20000 --reporter spec"
+    "test": "mocha --timeout 20000 --reporter spec",
+    "test:12": "NODE_EXTRA_CA_CERTS=extra-ca.pem NODE_TLS_REJECT_UNAUTHORIZED=0 node test/12.0.js",
+    "reset": "NODE_EXTRA_CA_CERTS=extra-ca.pem NODE_TLS_REJECT_UNAUTHORIZED=0 node src/reset-permissions.js"
   },
   "repository": {
     "type": "git",
