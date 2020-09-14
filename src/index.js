@@ -1,14 +1,6 @@
 const request = require('request-promise-native')
 const queryString = require('query-string')
 
-// construct cookie string for REST requests
-function makeCookieString ({jSessionId, jSessionIdSso, xsrf}) {
-  let cookieString = `JSESSIONID=${jSessionId};`
-  cookieString += `JSESSIONIDSSO=${jSessionIdSso};`
-  cookieString += `XSRF-TOKEN=${xsrf};`
-  return cookieString
-}
-
 // just a sleep function
 function sleep (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
@@ -24,7 +16,8 @@ class CUIC {
     domain = 'CUIC',
     timeout = 3600,
     throttle = 100,
-    version = '11.6'
+    version = '11.6',
+    sso = true
   }) {
     if (!host) throw Error('CUIC client - host is a required parameter')
     if (!username) throw Error('CUIC client - username is a required parameter')
@@ -44,6 +37,22 @@ class CUIC {
     this.version = version
     // last cookie timestamp
     this.lastAuthenticated = 0
+    // whether to use SSO in cookies
+    this.sso = sso
+  }
+
+  // construct cookie string for REST requests
+  makeCookieString ({
+    jSessionId,
+    jSessionIdSso,
+    xsrf
+  }) {
+    let cookieString = `JSESSIONID=${jSessionId};`
+    if (this.sso) {
+      cookieString += `JSESSIONIDSSO=${jSessionIdSso};`
+    }
+    cookieString += `XSRF-TOKEN=${xsrf};`
+    return cookieString
   }
 
   // get permissions in 12.0
@@ -430,11 +439,14 @@ class CUIC {
     })
     // extract cookie values that we need
     let jSessionId = this.getCookieValue(jar, '/cuic', 'JSESSIONID')
-    let jSessionIdSso = this.getCookieValue(jar, '/', 'JSESSIONIDSSO')
+    let jSessionIdSso
+    if (this.sso) {
+      jSessionIdSso = this.getCookieValue(jar, '/', 'JSESSIONIDSSO')
+    }
     this.xsrf = this.getCookieValue(jar, '/', 'XSRF-TOKEN')
 
     // set cookie string
-    this.cookieString = makeCookieString({
+    this.cookieString = this.makeCookieString({
       jSessionId,
       jSessionIdSso,
       xsrf: this.xsrf

@@ -9,7 +9,8 @@ const client = new CUIC({
   username: process.env.USERNAME,
   domain: process.env.DOMAIN,
   password: process.env.PASSWORD,
-  version: process.env.VERSION
+  version: process.env.VERSION,
+  sso: process.env.SSO === 'true'
 })
 
 // // turn tree into an array children with no containers
